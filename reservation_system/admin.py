@@ -1,6 +1,6 @@
 from django.contrib import admin
-from .models import User, Room, Booking
+from .models import CustomUser, Room, Booking
 
-admin.site.register(User)
+admin.site.register(CustomUser)
 admin.site.register(Room)
 admin.site.register(Booking)
