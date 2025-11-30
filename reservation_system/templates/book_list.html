@@ -1,0 +1,8 @@
+<h1>Бронювання кімнати: {{ room.name }}</h1>
+
+<form method="post">
+    {% csrf_token %}
+    <p>Дата початку: <input type="datetime-local" name="start_date" required></p>
+    <p>Дата завершення: <input type="datetime-local" name="end_date" required></p>
+    <button type="submit">Забронювати</button>
+</form>

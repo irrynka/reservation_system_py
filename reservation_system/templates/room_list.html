@@ -1,0 +1,9 @@
+<h1>Всі кімнати</h1>
+<ul>
+    {% for room in rooms %}
+    <li>
+        {{ room.name }} ({{ room.capacity }} місць)
+        <a href="{% url 'booking_list' room.id %}">Забронювати</a>
+    </li>
+    {% endfor %}
+</ul>
