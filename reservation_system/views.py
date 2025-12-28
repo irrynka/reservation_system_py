@@ -1,65 +1,77 @@
-from django.shortcuts import render, redirect
-from .models import Room, Booking
-from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
+from .models import Room, Booking
+from django.contrib.auth import logout
 
 
 def home(request):
-    return HttpResponse("Вітаю! Це головна сторінка системи бронювання.")
-
-
+    return render(request, 'home.html')
 
 def room_list(request):
     rooms = Room.objects.all()
     return render(request, 'room_list.html', {'rooms': rooms})
 
-@login_required 
+@login_required
 def booking_list(request, room_id):
-    room = Room.objects.get(id=room_id)
+    room = get_object_or_404(Room, id=room_id)
+
     if request.method == 'POST':
         start_date = request.POST.get('start_date')
         end_date = request.POST.get('end_date')
-        booking = Booking(
+        Booking.objects.create(
             user=request.user,
             room=room,
             start_date=start_date,
             end_date=end_date,
             is_confirmed=True
         )
-        booking.save()
         return redirect('booking_success')
 
     return render(request, 'book_list.html', {'room': room})
+
 
 def booking_success(request):
     return render(request, 'booking_success.html')
 
 
-def register(request):
+
+def auth_view(request):
+    if request.user.is_authenticated:
+        return redirect('room_list')
+
+    login_form = AuthenticationForm()
+    register_form = UserCreationForm()
+    active_tab = 'login'
+
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)
-            return redirect('room_list')
-    else:
-        form = UserCreationForm()
+        if 'login_submit' in request.POST:
+            login_form = AuthenticationForm(request, data=request.POST)
+            if login_form.is_valid():
+                user = login_form.get_user()
+                login(request, user)
+                return redirect('room_list')
+            else:
+                active_tab = 'login'
 
-    return render(request, 'register.html', {'form': form})
+        elif 'register_submit' in request.POST:
+            register_form = UserCreationForm(request.POST)
+            if register_form.is_valid():
+                user = register_form.save()
+                login(request, user)
+                return redirect('room_list')
+            else:
+                active_tab = 'register'
 
+    return render(request, 'auth.html', {
+        'login_form': login_form,
+        'register_form': register_form,
+        'active_tab': active_tab
+    })
 
-def user_login(request):
-    if request.method == 'POST':
-        form = AuthenticationForm(request, data=request.POST)
-        if form.is_valid():
-            user = form.get_user()
-            login(request, user)
-            return redirect('room_list')
-    else:
-        form = AuthenticationForm()
-
-    return render(request, 'login.html', {'form': form})
-
-
+@login_required
+def user_logout(request):
+    logout(request)
+    return redirect('auth') 

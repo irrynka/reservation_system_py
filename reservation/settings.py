@@ -72,6 +72,10 @@ WSGI_APPLICATION = 'reservation.wsgi.application'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+LOGIN_URL = '/auth/'  # Тепер login_required буде йти сюди
+
+
+
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
@@ -113,7 +117,6 @@ USE_I18N = True
 
 USE_TZ = True
 
-LOGIN_URL = '/login/'
 
 
 
